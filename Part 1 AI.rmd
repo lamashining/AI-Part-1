@@ -1,0 +1,89 @@
+---
+title: "AI Part 1 Analysis"
+output: word_document
+date: "2023-08-18"
+---
+
+#Introduction 
+In this analysis we have explored the Twitter dataset related to popular Netflix show Squid Game. The analysis presents the frequency of the tweets, top tweeting locations including the top 10, and the most retweeted tweets including the top 20. 
+
+```{r}
+#Load required libraries 
+library(dplyr)
+library(ggplot2)
+```
+#Data imported
+```{r}
+ rm(list=ls())
+ squidgame <- read.csv("C:/Users/sumitra/Desktop/squidgame.csv", comment.char="#")
+ View(squidgame)
+
+```
+#The data loaded and cleaned 
+```{r}
+library(dplyr)
+library(ggplot2)
+ squidgame$text[squidgame$text == ""] <- NA
+ squidgame$source[squidgame$source == ""] <- NA
+ squidgame$user_description[squidgame$user_description == ""] <- NA
+ squidgame$user_location[squidgame$user_location == ""] <- NA
+ cleaned_tweets<-na.omit(squidgame)
+ View(cleaned_tweets)
+```
+#Reviewing the dataset and visualizing the frequency of the squid game tweets
+
+```{r}
+# Convert timestamps
+cleaned_tweets$date <- as.POSIXct(strptime(cleaned_tweets$date, format = "%Y-%m-%d %H:%M:%S"), tz = "UTC")
+
+# Create a time-based histogram of tweet frequencies
+ggplot(data = cleaned_tweets, aes(x = date)) +
+    geom_histogram(binwidth = 60*60, fill = "blue", color = "black") +
+    labs(title = "Squid Game Tweet Frequency Over Time", x = "Time", y = "Number of Tweets") +
+    scale_x_datetime(date_labels = "%Y-%m-%d %H:%M", date_breaks = "1 hour")
+library(stringr)
+# Extract hashtags from tweets
+hashtags <- unlist(str_extract_all(cleaned_tweets$text, "#\\w+"))
+
+```
+
+#Identifying top tweeting locations including top 10
+```{r}
+library(dplyr)
+
+# Group by user_location and count the number of tweets in each location
+top_locations <- cleaned_tweets %>%
+    group_by(user_location) %>%
+    summarise(tweet_count = n()) %>%
+    arrange(desc(tweet_count))
+
+# View the top locations data
+View(top_locations)
+ # Display the first 10 top tweeting locations
+ head(top_locations, 10)
+# A tibble: 10 × 2
+#The data shows that the top 10 tweeting locations are India, Los Angeles;CA, United States, Dubai, London, United Kingdom, Mumbai, Canada. 
+
+```
+#Most retweeted tweets including top 20 
+```{r}
+ # Load necessary libraries
+# Load necessary libraries
+library(dplyr)
+
+# Arrange tweets in descending order of retweet count
+top_retweeted_tweets <- cleaned_tweets %>%
+    arrange(desc(is_retweet))
+ # Display the top 20 most retweeted tweets
+ head(top_retweeted_tweets, 20)
+#The dataset below shows the top 20 users along with their user location, descprition and source, whose tweets have been most retweeted. 
+```
+
+```{r}
+# Arrange the dataset by is_retweet in descending order and select the top 20
+top_retweeted <- cleaned_tweets %>%
+    arrange(desc(is_retweet)) %>%
+    head(20)
+View(top_retweeted)
+```
+
